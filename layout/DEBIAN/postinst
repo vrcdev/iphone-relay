@@ -1,0 +1,6 @@
+#!/bin/bash
+mkdir -p /var/jb/var/log
+launchctl bootstrap system /var/jb/Library/LaunchDaemons/com.vrcdev.sockd.plist 2>/dev/null \
+    || launchctl load -w /var/jb/Library/LaunchDaemons/com.vrcdev.sockd.plist 2>/dev/null \
+    || true
+exit 0

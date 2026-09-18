@@ -1,0 +1,37 @@
+name: build-deb
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: brew install ldid dpkg
+
+      - name: Cross-compile sockd (arm64e, iOS 14.0+)
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          clang -arch arm64e -isysroot "$SDK" -miphoneos-version-min=14.0 \
+                -O2 -Wall -std=c99 -o sockd src/*.c -lpthread
+          ldid -S sockd
+
+      - name: Assemble rootless .deb
+        run: |
+          mkdir -p pkg/usr/libexec
+          cp sockd pkg/usr/libexec/
+          chmod 755 pkg/usr/libexec/sockd
+          cp -r layout/* pkg/
+          chmod 755 pkg/DEBIAN/postinst
+          dpkg-deb --build --root-owner-group pkg com.vrcdev.sockd_1.0.0_iphoneos-arm64.deb
+
+      - name: Upload .deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: sockd-deb
+          path: com.vrcdev.sockd_1.0.0_iphoneos-arm64.deb
