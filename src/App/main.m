@@ -98,6 +98,13 @@ static int read_timeout(int fd, void *buf, size_t len, int msec) {
     ]];
 
     [self refresh];
+    // Live status — the daemon's health flaps under load, so poll instead of
+    // making the user hit Refresh to see it recover/fail.
+    [NSTimer scheduledTimerWithTimeInterval:2.0
+                                     target:self
+                                   selector:@selector(refresh)
+                                   userInfo:nil
+                                    repeats:YES];
 }
 
 - (UILabel *)makeLabel:(UIFontTextStyle)style bold:(BOOL)bold {
@@ -119,7 +126,10 @@ static int read_timeout(int fd, void *buf, size_t len, int msec) {
         _statusLabel.textColor = UIColor.systemRedColor;
     }
     _wifiLabel.text = [NSString stringWithFormat:@"Wi-Fi: %@", [self wifiAddress]];
-    _logView.text = [self logTail];
+    // Only rewrite the log view when content changed — keeps scroll position
+    // stable under the 2s auto-refresh while reading the log.
+    NSString *lt = [self logTail];
+    if (![lt isEqualToString:_logView.text]) _logView.text = lt;
 }
 
 - (void)testRelay {

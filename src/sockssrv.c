@@ -356,6 +356,13 @@ static int handshake(struct thread *t) {
 
 static void* clientthread(void *data) {
 	struct thread *t = data;
+	/* -t only guarded the relay copyloop — a client that connects and then
+	   stalls mid-handshake (dead usbmux path) would hold its fd forever.
+	   Apply the same timeout to the handshake recv so zombies get reaped. */
+	if(timeout) {
+		struct timeval tv = { timeout, 0 };
+		setsockopt(t->client.fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+	}
 	int remotefd = handshake(t);
 	if(remotefd != -1) {
 		copyloop(t->client.fd, remotefd);
