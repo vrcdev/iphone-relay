@@ -138,6 +138,11 @@ static int read_timeout(int fd, void *buf, size_t len, int msec) {
 // Full relay check: SOCKS5 CONNECT through 127.0.0.1:9876 to ip-api.com:80,
 // plain HTTP GET, parse the "query" field = the IP the world sees.
 - (NSString *)fetchExitIP {
+    // ObjC objects declared up top — goto can't jump over __strong inits under ARC
+    NSMutableData *resp = nil;
+    NSString *body = nil;
+    NSRegularExpression *re = nil;
+    NSTextCheckingResult *m = nil;
     int fd = tcp_connect(htonl(INADDR_LOOPBACK), RELAY_PORT, 3000);
     if (fd < 0) return @"daemon not listening";
     unsigned char buf[1024];
@@ -156,18 +161,18 @@ static int read_timeout(int fd, void *buf, size_t len, int msec) {
 
     const char *get = "GET /json HTTP/1.0\r\nHost: ip-api.com\r\n\r\n";
     write(fd, get, strlen(get));
-    NSMutableData *resp = [NSMutableData new];
+    resp = [NSMutableData new];
     int n;
     while ((n = read_timeout(fd, buf, sizeof buf, 4000)) > 0)
         [resp appendBytes:buf length:n];
     close(fd);
 
-    NSString *body = [[NSString alloc] initWithData:resp
-                                         encoding:NSUTF8StringEncoding] ?: @"";
-    NSRegularExpression *re = [NSRegularExpression
+    body = [[NSString alloc] initWithData:resp
+                               encoding:NSUTF8StringEncoding] ?: @"";
+    re = [NSRegularExpression
         regularExpressionWithPattern:@"\"query\"\\s*:\\s*\"([^\"]+)\""
         options:0 error:nil];
-    NSTextCheckingResult *m = [re firstMatchInString:body options:0
+    m = [re firstMatchInString:body options:0
         range:NSMakeRange(0, body.length)];
     return m ? [body substringWithRange:[m rangeAtIndex:1]]
              : @"connected, exit IP not parsed";
