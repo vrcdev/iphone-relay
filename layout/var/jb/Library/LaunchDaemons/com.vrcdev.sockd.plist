@@ -8,7 +8,7 @@
     <array>
         <string>/var/jb/usr/libexec/sockd</string>
         <string>-i</string>
-        <string>127.0.0.1</string>
+        <string>0.0.0.0</string>
         <string>-p</string>
         <string>9876</string>
         <string>-t</string>
