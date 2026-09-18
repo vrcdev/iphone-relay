@@ -1,0 +1,5 @@
+artifacts/
+pkg/
+*.deb
+sockd
+SockdPane
