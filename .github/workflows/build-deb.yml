@@ -53,10 +53,10 @@ jobs:
                     pkg/var/jb/Applications/SockdApp.app/SockdApp
           cp -r layout/* pkg/
           chmod 755 pkg/DEBIAN/postinst
-          dpkg-deb --build --root-owner-group pkg com.vrcdev.sockd_1.2.1_iphoneos-arm64.deb
+          dpkg-deb --build --root-owner-group pkg com.vrcdev.sockd_1.2.2_iphoneos-arm64.deb
 
       - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
           name: sockd-deb
-          path: com.vrcdev.sockd_1.2.1_iphoneos-arm64.deb
+          path: com.vrcdev.sockd_1.2.2_iphoneos-arm64.deb
