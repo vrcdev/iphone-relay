@@ -31,21 +31,32 @@ jobs:
                 -undefined dynamic_lookup
           ldid -S SockdPane
 
+      - name: Cross-compile SockdApp status app
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          clang -arch arm64e -isysroot "$SDK" -miphoneos-version-min=14.0 \
+                -O2 -fobjc-arc -o SockdApp src/App/main.m \
+                -framework Foundation -framework UIKit
+          ldid -Ssrc/App/entitlements.plist SockdApp
+
       - name: Assemble rootless .deb
         run: |
           mkdir -p pkg/usr/libexec \
-                   pkg/Library/PreferenceBundles/SockdPane.bundle
+                   pkg/Library/PreferenceBundles/SockdPane.bundle \
+                   pkg/Applications/SockdApp.app
           cp sockd pkg/usr/libexec/
           cp SockdPane src/Preferences/Resources/* \
              pkg/Library/PreferenceBundles/SockdPane.bundle/
+          cp SockdApp src/App/Info.plist pkg/Applications/SockdApp.app/
           chmod 755 pkg/usr/libexec/sockd \
-                    pkg/Library/PreferenceBundles/SockdPane.bundle/SockdPane
+                    pkg/Library/PreferenceBundles/SockdPane.bundle/SockdPane \
+                    pkg/Applications/SockdApp.app/SockdApp
           cp -r layout/* pkg/
           chmod 755 pkg/DEBIAN/postinst
-          dpkg-deb --build --root-owner-group pkg com.vrcdev.sockd_1.1.0_iphoneos-arm64.deb
+          dpkg-deb --build --root-owner-group pkg com.vrcdev.sockd_1.2.0_iphoneos-arm64.deb
 
       - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
           name: sockd-deb
-          path: com.vrcdev.sockd_1.1.0_iphoneos-arm64.deb
+          path: com.vrcdev.sockd_1.2.0_iphoneos-arm64.deb

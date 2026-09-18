@@ -3,4 +3,8 @@ mkdir -p /var/jb/var/log
 launchctl bootstrap system /var/jb/Library/LaunchDaemons/com.vrcdev.sockd.plist 2>/dev/null \
     || launchctl load -w /var/jb/Library/LaunchDaemons/com.vrcdev.sockd.plist 2>/dev/null \
     || true
+# Register the app on the home screen — no sideload needed on a jailbreak
+uicache -p /var/jb/Applications/SockdApp.app 2>/dev/null \
+    || uicache --all 2>/dev/null \
+    || true
 exit 0
