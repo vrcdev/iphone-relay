@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Status</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTitleValueCell</string>
+			<key>label</key>
+			<string>Daemon</string>
+			<key>get</key>
+			<string>daemonStatus:</string>
+			<key>id</key>
+			<string>daemon</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTitleValueCell</string>
+			<key>label</key>
+			<string>Wi-Fi Address</string>
+			<key>get</key>
+			<string>wifiAddress:</string>
+			<key>id</key>
+			<string>wifi</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTitleValueCell</string>
+			<key>label</key>
+			<string>Relay Exit IP</string>
+			<key>get</key>
+			<string>exitIPStatus:</string>
+			<key>id</key>
+			<string>exitip</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Actions</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>label</key>
+			<string>Test Relay</string>
+			<key>action</key>
+			<string>testRelay</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>label</key>
+			<string>Refresh</string>
+			<key>action</key>
+			<string>refreshStatus</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Log</string>
+			<key>id</key>
+			<string>loggroup</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>SOCKS Relay</string>
+</dict>
+</plist>
