@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install build deps
-        run: brew install ldid
+        run: brew install ldid make  # stock make 3.81 can't parse hev's Makefile
 
       - name: Fetch hev-socks5-server 2.13.1
         run: |
@@ -24,7 +24,7 @@ jobs:
       - name: Cross-compile hev-socks5-server static lib (arm64, iOS 15.0+)
         run: |
           SDK=$(xcrun --sdk iphoneos --show-sdk-path)
-          make -C hev static \
+          gmake -C hev static \
             CC="xcrun -sdk iphoneos clang" \
             PP="xcrun -sdk iphoneos clang -E" \
             AR="xcrun ar" \
