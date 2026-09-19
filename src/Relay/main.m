@@ -249,6 +249,11 @@ fail:
 
 @end
 
+/* Publishing a Bonjour service is what triggers the iOS "Local Network"
+   permission prompt — without the grant, the OS resets inbound connections
+   from other devices even though the listen socket accepts loopback. */
+static NSNetService *gBonjour;
+
 /* Silent audio keeps the process alive when backgrounded/screen-locked.
    Paired with the 'audio' UIBackgroundMode. */
 static AVAudioEngine *gEngine;
@@ -296,6 +301,12 @@ static void start_silence(void) {
 
     app.idleTimerDisabled = YES;
     start_silence();
+
+    gBonjour = [[NSNetService alloc] initWithDomain:@"local."
+                                              type:@"_socks._tcp"
+                                              name:@"Relay"
+                                              port:RELAY_PORT];
+    [gBonjour publish];
 
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     UINavigationController *nav =
