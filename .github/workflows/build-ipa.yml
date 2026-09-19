@@ -20,6 +20,11 @@ jobs:
             https://github.com/heiher/hev-socks5-server hev
           # JNI source is Android-only; drop it from the source list if present
           sed -i '' '/hev-jni/d' hev/build.mk 2>/dev/null || true
+          # UDP associate: don't connect() the relay socket when the client
+          # claims port 0 (hev-socks5-tunnel does exactly that). The recv path
+          # already captures the real peer via the udp_associated flag.
+          sed -i '' 's/res = connect (sock, (struct sockaddr \*)dst, sizeof (struct sockaddr_in6));/if (dst->sin6_port) res = connect (sock, (struct sockaddr *)dst, sizeof (struct sockaddr_in6));/' \
+            hev/src/hev-socks5-session.c
 
       - name: Cross-compile hev-socks5-server static lib (arm64, iOS 15.0+)
         run: |
