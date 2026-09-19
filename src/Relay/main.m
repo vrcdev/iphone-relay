@@ -56,6 +56,7 @@ static void *server_thread(void *arg) {
         @"  listen-address: '0.0.0.0'\n"
         @"  port: %d\n"
         @"  udp-port: %d\n"
+        @"  udp-listen-address: '0.0.0.0'\n"
         @"  listen-ipv6-only: false\n"
         @"  domain-address-type: ipv4\n"
         /* Uncomment to force all upstream traffic onto cellular even when
@@ -148,7 +149,7 @@ static void *server_thread(void *arg) {
     int fd = tcp_connect(htonl(INADDR_LOOPBACK), RELAY_PORT, 800);
     if (fd >= 0) {
         close(fd);
-        _statusLabel.text = [NSString stringWithFormat:@"LISTENING on 0.0.0.0:%d", RELAY_PORT];
+        _statusLabel.text = [NSString stringWithFormat:@"LISTENING on 0.0.0.0:%d [udp-b4]", RELAY_PORT];
         _statusLabel.textColor = UIColor.systemGreenColor;
     } else if (gServerStarted) {
         _statusLabel.text = @"server exited — see log";
