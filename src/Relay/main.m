@@ -55,7 +55,6 @@ static void *server_thread(void *arg) {
         @"  workers: 4\n"
         @"  listen-address: '0.0.0.0'\n"
         @"  port: %d\n"
-        @"  udp-port: %d\n"
         @"  udp-listen-address: '0.0.0.0'\n"
         @"  udp-public-address-v4: '172.20.10.1'\n"
         @"  listen-ipv6-only: false\n"
@@ -66,7 +65,7 @@ static void *server_thread(void *arg) {
         @"misc:\n"
         @"  log-file: '%@'\n"
         @"  log-level: debug\n",
-        RELAY_PORT, RELAY_PORT, gLogPath];
+        RELAY_PORT, gLogPath];
     NSData *d = [conf dataUsingEncoding:NSUTF8StringEncoding];
     gServerStarted = 1;
     hev_socks5_server_main_from_str(d.bytes, (unsigned int)d.length);
