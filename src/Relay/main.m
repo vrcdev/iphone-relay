@@ -57,6 +57,7 @@ static void *server_thread(void *arg) {
         @"  port: %d\n"
         @"  udp-port: %d\n"
         @"  udp-listen-address: '0.0.0.0'\n"
+        @"  udp-public-address-v4: '172.20.10.1'\n"
         @"  listen-ipv6-only: false\n"
         @"  domain-address-type: ipv4\n"
         /* Uncomment to force all upstream traffic onto cellular even when
