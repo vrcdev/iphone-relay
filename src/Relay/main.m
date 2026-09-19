@@ -55,6 +55,7 @@ static void *server_thread(void *arg) {
         @"  workers: 4\n"
         @"  listen-address: '0.0.0.0'\n"
         @"  port: %d\n"
+        @"  udp-port: %d\n"
         @"  listen-ipv6-only: false\n"
         @"  domain-address-type: ipv4\n"
         /* Uncomment to force all upstream traffic onto cellular even when
@@ -63,7 +64,7 @@ static void *server_thread(void *arg) {
         @"misc:\n"
         @"  log-file: '%@'\n"
         @"  log-level: info\n",
-        RELAY_PORT, gLogPath];
+        RELAY_PORT, RELAY_PORT, gLogPath];
     NSData *d = [conf dataUsingEncoding:NSUTF8StringEncoding];
     gServerStarted = 1;
     hev_socks5_server_main_from_str(d.bytes, (unsigned int)d.length);
