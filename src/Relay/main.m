@@ -56,6 +56,7 @@ static void *server_thread(void *arg) {
         @"  listen-address: '::'\n"
         @"  port: %d\n"
         @"  listen-ipv6-only: false\n"
+        @"  domain-address-type: ipv4\n"
         /* Uncomment to force all upstream traffic onto cellular even when
            the phone is also joined to a Wi-Fi network: */
         /* @"  bind-interface: 'pdp_ip0'\n" */
@@ -216,7 +217,13 @@ static void *server_thread(void *arg) {
     memcpy(req + 5, host, hl);
     req[5 + hl] = 0x00; req[6 + hl] = 80;
     if (write(fd, req, 7 + hl) != 7 + hl) goto fail;
-    if (read_timeout(fd, buf, 10, 3000) < 4 || buf[1] != 0x00) goto fail;
+    int rn = read_timeout(fd, buf, 10, 3000);
+    if (rn < 4) goto fail;
+    if (buf[1] != 0x00) {
+        int rep = buf[1];
+        close(fd);
+        return [NSString stringWithFormat:@"connect refused, socks rep=0x%02x", rep];
+    }
 
     const char *get = "GET /json HTTP/1.0\r\nHost: ip-api.com\r\n\r\n";
     write(fd, get, strlen(get));
