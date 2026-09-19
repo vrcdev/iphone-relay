@@ -25,6 +25,12 @@ jobs:
           # already captures the real peer via the udp_associated flag.
           sed -i '' 's/res = connect (sock, (struct sockaddr \*)dst, sizeof (struct sockaddr_in6));/if (dst->sin6_port) res = connect (sock, (struct sockaddr *)dst, sizeof (struct sockaddr_in6));/' \
             hev/src/hev-socks5-session.c
+          # UDP assoc reply: when the bound relay addr is unspecified (v6 ::),
+          # advertise the TCP connection's local addr (the tether IP) instead —
+          # clients send datagrams to whatever BND.ADDR reports.
+          sed -i '' 's/res = getsockname (sock, (struct sockaddr \*)src, &alen);/res = getsockname (sock, (struct sockaddr *)src, \&alen); if (IN6_IS_ADDR_UNSPECIFIED (\&src->sin6_addr)) { alen = sizeof (struct sockaddr_in6); getsockname (fd, (struct sockaddr *)src, \&alen); }/' \
+            hev/src/hev-socks5-session.c
+          grep -n 'IN6_IS_ADDR_UNSPECIFIED\|dst->sin6_port) res = connect' hev/src/hev-socks5-session.c
 
       - name: Cross-compile hev-socks5-server static lib (arm64, iOS 15.0+)
         run: |
