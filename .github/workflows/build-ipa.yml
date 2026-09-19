@@ -1,0 +1,59 @@
+name: build-ipa
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: brew install ldid
+
+      - name: Fetch hev-socks5-server 2.13.1
+        run: |
+          git clone --depth 1 --branch 2.13.1 --recursive \
+            https://github.com/heiher/hev-socks5-server hev
+          # JNI source is Android-only; drop it from the source list if present
+          sed -i '' '/hev-jni/d' hev/build.mk 2>/dev/null || true
+
+      - name: Cross-compile hev-socks5-server static lib (arm64, iOS 15.0+)
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          make -C hev static \
+            CC="xcrun -sdk iphoneos clang" \
+            PP="xcrun -sdk iphoneos clang -E" \
+            AR="xcrun ar" \
+            STRIP=true \
+            CFLAGS="-arch arm64 -isysroot $SDK -miphoneos-version-min=15.0 -Wno-error" \
+            V=1
+
+      - name: Cross-compile Relay app
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          xcrun -sdk iphoneos clang -arch arm64 -isysroot "$SDK" \
+                -miphoneos-version-min=15.0 -O2 -fobjc-arc -o Relay \
+                src/Relay/main.m \
+                hev/bin/libhev-socks5-server.a \
+                hev/third-part/yaml/bin/libyaml.a \
+                hev/third-part/hev-task-system/bin/libhev-task-system.a \
+                -framework UIKit -framework Foundation -framework AVFAudio \
+                -lpthread
+          ldid -S Relay
+
+      - name: Assemble unsigned IPA
+        run: |
+          mkdir -p Payload/Relay.app
+          cp Relay Payload/Relay.app/
+          cp src/Relay/Info.plist Payload/Relay.app/
+          zip -r Relay.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: relay-ipa
+          path: Relay.ipa

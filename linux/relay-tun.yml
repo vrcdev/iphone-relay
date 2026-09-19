@@ -1,0 +1,26 @@
+# hev-socks5-tunnel config — Linux client for the Relay app
+# https://github.com/heiher/hev-socks5-tunnel
+
+tunnel:
+  # Interface name
+  name: tun0
+  # MTU — keep under cellular ~1428 to avoid fragmentation
+  mtu: 1400
+  multi-queue: false
+  ipv4: 198.18.0.1
+
+socks5:
+  # iPhone's hotspot/USB-tether address
+  address: '172.20.10.1'
+  port: 1080
+  # Real UDP associate — the phone has a direct IP path over USB tether,
+  # so no UDP-over-TCP wrapping needed
+  udp: 'udp'
+  mark: 0
+
+misc:
+  task-stack-size: 81920
+  connect-timeout: 5000
+  read-write-timeout: 60000
+  log-file: stderr
+  log-level: warn
