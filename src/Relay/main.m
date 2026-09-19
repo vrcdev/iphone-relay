@@ -18,7 +18,7 @@ int hev_socks5_server_main_from_str(const unsigned char *config_str,
                                     unsigned int config_len);
 void hev_socks5_server_quit(void);
 
-#define RELAY_PORT 1080
+#define RELAY_PORT 11080
 
 static NSString *gLogPath;
 static volatile int gServerStarted;
@@ -53,7 +53,7 @@ static void *server_thread(void *arg) {
     NSString *conf = [NSString stringWithFormat:
         @"main:\n"
         @"  workers: 4\n"
-        @"  listen-address: '::'\n"
+        @"  listen-address: '0.0.0.0'\n"
         @"  port: %d\n"
         @"  listen-ipv6-only: false\n"
         @"  domain-address-type: ipv4\n"

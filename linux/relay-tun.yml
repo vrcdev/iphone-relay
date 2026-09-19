@@ -12,7 +12,7 @@ tunnel:
 socks5:
   # iPhone's hotspot/USB-tether address
   address: '172.20.10.1'
-  port: 1080
+  port: 11080
   # Real UDP associate — the phone has a direct IP path over USB tether,
   # so no UDP-over-TCP wrapping needed
   udp: 'udp'
