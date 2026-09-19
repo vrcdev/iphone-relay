@@ -65,7 +65,7 @@ static void *server_thread(void *arg) {
         /* @"  bind-interface: 'pdp_ip0'\n" */
         @"misc:\n"
         @"  log-file: '%@'\n"
-        @"  log-level: info\n",
+        @"  log-level: debug\n",
         RELAY_PORT, RELAY_PORT, gLogPath];
     NSData *d = [conf dataUsingEncoding:NSUTF8StringEncoding];
     gServerStarted = 1;
