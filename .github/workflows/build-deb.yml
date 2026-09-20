@@ -24,19 +24,20 @@ jobs:
           sed -i '' 's/res = getsockname (sock, (struct sockaddr \*)src, &alen);/res = getsockname (sock, (struct sockaddr *)src, \&alen); if (IN6_IS_ADDR_UNSPECIFIED (\&src->sin6_addr)) { alen = sizeof (struct sockaddr_in6); getsockname (fd, (struct sockaddr *)src, \&alen); }/' \
             hev/src/hev-socks5-session.c
 
-      - name: Cross-compile hev static lib + sockd5 daemon (arm64e, iOS 14.0+)
+      - name: Cross-compile hev static lib + sockd5 daemon (arm64, iOS 14.0+)
         run: |
           SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          # arm64, NOT arm64e: hev's coroutine task-switcher crashes on PAC.
           gmake -C hev static \
             CC="xcrun -sdk iphoneos clang" \
             PP="xcrun -sdk iphoneos clang -E" \
             AR="xcrun ar" \
             STRIP=true \
-            CFLAGS="-arch arm64e -isysroot $SDK -miphoneos-version-min=14.0 -Wno-error" \
+            CFLAGS="-arch arm64 -isysroot $SDK -miphoneos-version-min=14.0 -Wno-error" \
             V=1
           # hev-main.c ships a weak main() inside the lib — linking it alone
           # yields the standalone daemon: sockd5 <config.yml>
-          xcrun -sdk iphoneos clang -arch arm64e -isysroot "$SDK" \
+          xcrun -sdk iphoneos clang -arch arm64 -isysroot "$SDK" \
                 -miphoneos-version-min=14.0 -O2 -o sockd5 \
                 hev/bin/libhev-socks5-server.a \
                 hev/third-part/yaml/bin/libyaml.a \
