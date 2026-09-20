@@ -48,7 +48,7 @@ jobs:
           SDK=$(xcrun --sdk iphoneos --show-sdk-path)
           xcrun -sdk iphoneos clang -arch arm64 -isysroot "$SDK" \
                 -miphoneos-version-min=15.0 -O2 -fobjc-arc \
-                -DBUILD_TAG='"${GITHUB_SHA:0:7}"' \
+                -DBUILD_TAG="\"${GITHUB_SHA:0:7}\"" \
                 -o Relay \
                 src/Relay/main.m \
                 hev/bin/libhev-socks5-server.a \
