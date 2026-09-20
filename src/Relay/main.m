@@ -56,9 +56,9 @@ static void *server_thread(void *arg) {
     NSString *conf = [NSString stringWithFormat:
         @"main:\n"
         @"  workers: 4\n"
-        @"  listen-address: '0.0.0.0'\n"
+        @"  listen-address: '::'\n"
         @"  port: %d\n"
-        @"  udp-listen-address: '0.0.0.0'\n"
+        @"  udp-listen-address: '::'\n"
         @"  udp-public-address-v4: '172.20.10.1'\n"
         @"  listen-ipv6-only: false\n"
         @"  domain-address-type: ipv4\n"
