@@ -47,7 +47,9 @@ jobs:
         run: |
           SDK=$(xcrun --sdk iphoneos --show-sdk-path)
           xcrun -sdk iphoneos clang -arch arm64 -isysroot "$SDK" \
-                -miphoneos-version-min=15.0 -O2 -fobjc-arc -o Relay \
+                -miphoneos-version-min=15.0 -O2 -fobjc-arc \
+                -DBUILD_TAG='"${GITHUB_SHA:0:7}"' \
+                -o Relay \
                 src/Relay/main.m \
                 hev/bin/libhev-socks5-server.a \
                 hev/third-part/yaml/bin/libyaml.a \
@@ -61,6 +63,8 @@ jobs:
           mkdir -p Payload/Relay.app
           cp Relay Payload/Relay.app/
           cp src/Relay/Info.plist Payload/Relay.app/
+          plutil -replace CFBundleVersion -string "$GITHUB_RUN_NUMBER" Payload/Relay.app/Info.plist
+          plutil -replace CFBundleShortVersionString -string "1.0.$GITHUB_RUN_NUMBER" Payload/Relay.app/Info.plist
           zip -r Relay.ipa Payload
 
       - name: Upload IPA

@@ -19,6 +19,9 @@ int hev_socks5_server_main_from_str(const unsigned char *config_str,
 void hev_socks5_server_quit(void);
 
 #define RELAY_PORT 11080
+#ifndef BUILD_TAG
+#define BUILD_TAG "dev"
+#endif
 
 static NSString *gLogPath;
 static volatile int gServerStarted;
@@ -149,7 +152,7 @@ static void *server_thread(void *arg) {
     int fd = tcp_connect(htonl(INADDR_LOOPBACK), RELAY_PORT, 800);
     if (fd >= 0) {
         close(fd);
-        _statusLabel.text = [NSString stringWithFormat:@"LISTENING on 0.0.0.0:%d [udp-b4]", RELAY_PORT];
+        _statusLabel.text = [NSString stringWithFormat:@"LISTENING on 0.0.0.0:%d [%s]", RELAY_PORT, BUILD_TAG];
         _statusLabel.textColor = UIColor.systemGreenColor;
     } else if (gServerStarted) {
         _statusLabel.text = @"server exited — see log";
