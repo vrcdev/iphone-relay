@@ -75,6 +75,39 @@ static void *server_thread(void *arg) {
     return NULL;
 }
 
+/* Minimal HTTP endpoint so the log can be fetched over the tether:
+     curl http://172.20.10.1:11880/log */
+#define LOG_HTTP_PORT 11880
+
+static void *log_http_thread(void *arg) {
+    int lfd = socket(AF_INET, SOCK_STREAM, 0);
+    int one = 1;
+    setsockopt(lfd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof one);
+    struct sockaddr_in sa; memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+    sa.sin_port = htons(LOG_HTTP_PORT);
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
+    if (bind(lfd, (struct sockaddr *)&sa, sizeof sa) < 0 || listen(lfd, 4) < 0)
+        return NULL;
+    for (;;) {
+        int c = accept(lfd, NULL, NULL);
+        if (c < 0) continue;
+        char req[512];
+        read(c, req, sizeof req);
+        NSString *log = [NSString stringWithContentsOfFile:gLogPath
+                                encoding:NSUTF8StringEncoding error:nil] ?: @"";
+        NSData *body = [log dataUsingEncoding:NSUTF8StringEncoding];
+        char hdr[128];
+        int hn = snprintf(hdr, sizeof hdr,
+            "HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\n\r\n",
+            (unsigned long)body.length);
+        write(c, hdr, hn);
+        write(c, body.bytes, body.length);
+        close(c);
+    }
+    return NULL;
+}
+
 @interface StatusViewController : UIViewController
 @end
 
@@ -302,6 +335,8 @@ static void start_silence(void) {
 
     pthread_t tid;
     pthread_create(&tid, NULL, server_thread, NULL);
+    pthread_detach(tid);
+    pthread_create(&tid, NULL, log_http_thread, NULL);
     pthread_detach(tid);
 
     app.idleTimerDisabled = YES;
