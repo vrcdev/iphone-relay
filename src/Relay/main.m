@@ -18,7 +18,7 @@ int hev_socks5_server_main_from_str(const unsigned char *config_str,
                                     unsigned int config_len);
 void hev_socks5_server_quit(void);
 
-#define RELAY_PORT 11080
+#define RELAY_PORT 12080
 #ifndef BUILD_TAG
 #define BUILD_TAG "dev"
 #endif
