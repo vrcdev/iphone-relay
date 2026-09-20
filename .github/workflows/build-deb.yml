@@ -12,7 +12,37 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install build deps
-        run: brew install ldid dpkg
+        run: brew install ldid dpkg make
+
+      - name: Fetch hev-socks5-server 2.13.1
+        run: |
+          git clone --depth 1 --branch 2.13.1 --recursive \
+            https://github.com/heiher/hev-socks5-server hev
+          sed -i '' '/hev-jni/d' hev/build.mk 2>/dev/null || true
+          sed -i '' 's/res = connect (sock, (struct sockaddr \*)dst, sizeof (struct sockaddr_in6));/if (dst->sin6_port) res = connect (sock, (struct sockaddr *)dst, sizeof (struct sockaddr_in6));/' \
+            hev/src/hev-socks5-session.c
+          sed -i '' 's/res = getsockname (sock, (struct sockaddr \*)src, &alen);/res = getsockname (sock, (struct sockaddr *)src, \&alen); if (IN6_IS_ADDR_UNSPECIFIED (\&src->sin6_addr)) { alen = sizeof (struct sockaddr_in6); getsockname (fd, (struct sockaddr *)src, \&alen); }/' \
+            hev/src/hev-socks5-session.c
+
+      - name: Cross-compile hev static lib + sockd5 daemon (arm64e, iOS 14.0+)
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          gmake -C hev static \
+            CC="xcrun -sdk iphoneos clang" \
+            PP="xcrun -sdk iphoneos clang -E" \
+            AR="xcrun ar" \
+            STRIP=true \
+            CFLAGS="-arch arm64e -isysroot $SDK -miphoneos-version-min=14.0 -Wno-error" \
+            V=1
+          # hev-main.c ships a weak main() inside the lib — linking it alone
+          # yields the standalone daemon: sockd5 <config.yml>
+          xcrun -sdk iphoneos clang -arch arm64e -isysroot "$SDK" \
+                -miphoneos-version-min=14.0 -O2 -o sockd5 \
+                hev/bin/libhev-socks5-server.a \
+                hev/third-part/yaml/bin/libyaml.a \
+                hev/third-part/hev-task-system/bin/libhev-task-system.a \
+                -lpthread
+          ldid -S sockd5
 
       - name: Cross-compile sockd (arm64e, iOS 14.0+)
         run: |
@@ -44,19 +74,20 @@ jobs:
           mkdir -p pkg/var/jb/usr/libexec \
                    pkg/var/jb/Library/PreferenceBundles/SockdPane.bundle \
                    pkg/var/jb/Applications/SockdApp.app
-          cp sockd pkg/var/jb/usr/libexec/
+          cp sockd sockd5 pkg/var/jb/usr/libexec/
           cp SockdPane src/Preferences/Resources/* \
              pkg/var/jb/Library/PreferenceBundles/SockdPane.bundle/
           cp SockdApp src/App/Info.plist pkg/var/jb/Applications/SockdApp.app/
           chmod 755 pkg/var/jb/usr/libexec/sockd \
+                    pkg/var/jb/usr/libexec/sockd5 \
                     pkg/var/jb/Library/PreferenceBundles/SockdPane.bundle/SockdPane \
                     pkg/var/jb/Applications/SockdApp.app/SockdApp
           cp -r layout/* pkg/
           chmod 755 pkg/DEBIAN/postinst
-          dpkg-deb --build --root-owner-group pkg com.vrcdev.sockd_1.3.1_iphoneos-arm64.deb
+          dpkg-deb --build --root-owner-group pkg com.vrcdev.sockd_1.4.0_iphoneos-arm64.deb
 
       - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
           name: sockd-deb
-          path: com.vrcdev.sockd_1.3.1_iphoneos-arm64.deb
+          path: com.vrcdev.sockd_1.4.0_iphoneos-arm64.deb

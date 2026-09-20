@@ -6,13 +6,8 @@
     <string>com.vrcdev.sockd</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/var/jb/usr/libexec/sockd</string>
-        <string>-i</string>
-        <string>0.0.0.0</string>
-        <string>-p</string>
-        <string>9876</string>
-        <string>-t</string>
-        <string>300</string>
+        <string>/var/jb/usr/libexec/sockd5</string>
+        <string>/var/jb/usr/local/etc/sockd5.yml</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

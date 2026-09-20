@@ -1,0 +1,9 @@
+# hev-socks5-server daemon config — TCP + UDP-in-TCP relay for usbmux clients
+main:
+  workers: 2
+  listen-address: '::'
+  port: 9876
+  listen-ipv6-only: false
+  domain-address-type: ipv4
+misc:
+  log-level: info
